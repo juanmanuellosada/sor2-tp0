@@ -98,6 +98,9 @@ static int dev_open(struct inode *inodep, struct file *filep)
 static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *offset)
 {
     int error_count = 0;
+    int i;
+    char temp;
+
     if (*offset > 0)
     {
         // Ya se ha leído todo el mensaje, no hay más que leer
@@ -105,14 +108,16 @@ static ssize_t dev_read(struct file *filep, char *buffer, size_t len, loff_t *of
     }
 
     // Invertir el mensaje antes de enviarlo
-    int i;
-    char temp;
     for (i = 0; i < size_of_message / 2; i++)
     {
         temp = message[i];
         message[i] = message[size_of_message - i - 1];
         message[size_of_message - i - 1] = temp;
     }
+
+    // Agregar '\n' al final del mensaje
+    message[size_of_message] = '\n';
+    size_of_message++;
 
     error_count = copy_to_user(buffer, message, size_of_message);
 
